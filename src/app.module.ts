@@ -1,9 +1,24 @@
 import { Module } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
+import { TypeOrmModule } from '@nestjs/typeorm';
+import { PostsModule } from './posts/posts.module';
 
 @Module({
-  imports: [],
+  imports: [
+    TypeOrmModule.forRoot({
+      type: 'postgres',
+      host: 'localhost',
+      port: 5432,
+      username: 'postgres',
+      password: 'stalker1803',
+      database: 'wordpress_pg',
+      entities: [],
+      synchronize: false,
+      autoLoadEntities: true,
+    }),
+    PostsModule,
+  ],
   controllers: [AppController],
   providers: [AppService],
 })
