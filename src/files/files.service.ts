@@ -11,10 +11,11 @@ export class FilesService {
   ) {}
 
   async saveFile(file: Express.Multer.File): Promise<FileEntity> {
-    return await this.fileRepository.save({
+    const fileEntity = this.fileRepository.create({
       filename: file.filename,
-      path: file.path,
+      path: `uploads/${file.filename}`, // Сохраняем путь корректно
     });
+    return this.fileRepository.save(fileEntity);
   }
 
   async findFileById(id: string): Promise<FileEntity | null> {

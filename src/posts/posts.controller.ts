@@ -7,18 +7,36 @@ import {
   Param,
   Delete,
   Query,
+  ValidationPipe,
+  UseGuards,
+  UsePipes,
+  Req,
 } from '@nestjs/common';
 import { PostsService } from './posts.service';
 import { CreatePostDto } from './dto/create-post.dto';
 import { UpdatePostDto } from './dto/update-post.dto';
+import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+
+interface AuthenticatedRequest extends Request {
+  user: {
+    id: string;
+    email: string;
+    role: string;
+  };
+}
 
 @Controller('posts')
 export class PostsController {
   constructor(private readonly postsService: PostsService) {}
 
+  @UseGuards(JwtAuthGuard)
   @Post()
-  create(@Body() createPostDto: CreatePostDto) {
-    return this.postsService.create(createPostDto);
+  @UsePipes(new ValidationPipe({ transform: true, whitelist: true }))
+  create(
+    @Body() createPostDto: CreatePostDto,
+    @Req() req: AuthenticatedRequest,
+  ) {
+    return this.postsService.create(createPostDto, req.user.id);
   }
 
   @Get()
@@ -36,9 +54,15 @@ export class PostsController {
     return this.postsService.findOne(id);
   }
 
+  @UseGuards(JwtAuthGuard)
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updatePostDto: UpdatePostDto) {
-    return this.postsService.update(id, updatePostDto);
+  async update(
+    @Param('id') id: string,
+    @Body() updatePostDto: UpdatePostDto,
+    @Req() req: AuthenticatedRequest,
+  ) {
+    const userId = req.user.id;
+    return this.postsService.update(id, updatePostDto, userId);
   }
 
   @Delete(':id')

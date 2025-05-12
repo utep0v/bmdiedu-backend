@@ -36,7 +36,7 @@ export class UsersController {
     });
     await this.mailService.sendActivationEmail(
       createUserDto.email,
-      `http://frontend-url.com/activate/${activationToken}`,
+      `http://frontend-url.com/active-user/${activationToken}`,
     );
 
     return { message: 'Пользователь создан. Ссылка активации отправлена.' };
@@ -65,5 +65,12 @@ export class UsersController {
   @Delete(':id')
   remove(@Param('id') id: string) {
     return this.usersService.removeUser(id);
+  }
+
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('admin')
+  @Get(':id')
+  findOne(@Param('id') id: string) {
+    return this.usersService.findOne(id);
   }
 }

@@ -1,52 +1,88 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Like, Repository } from 'typeorm';
+import { ILike, Repository } from 'typeorm';
 import { Post } from './entities/post.entity';
 import { CreatePostDto } from './dto/create-post.dto';
 import { UpdatePostDto } from './dto/update-post.dto';
+import { FilesService } from '../files/files.service';
 
 @Injectable()
 export class PostsService {
   constructor(
     @InjectRepository(Post)
     private readonly postRepository: Repository<Post>,
+    private readonly filesService: FilesService,
   ) {}
 
-  create(createPostDto: CreatePostDto): Promise<Post> {
-    const post = this.postRepository.create(createPostDto);
+  async create(createPostDto: CreatePostDto, userId: string): Promise<Post> {
+    const { coverUrl, ...otherData } = createPostDto;
+
+    if (coverUrl) {
+      const file = await this.filesService.findFileById(coverUrl);
+      if (!file) {
+        throw new Error('Файл с таким ID не найден');
+      }
+    }
+
+    const post = this.postRepository.create({
+      ...otherData,
+      coverUrl,
+      authorId: userId,
+    });
+
     return this.postRepository.save(post);
   }
 
-  async findAll(
-    page = 1,
-    size = 10,
-    search?: string,
-    postType?: string,
-  ): Promise<Post[]> {
+  async findAll(page = 1, size = 10, search?: string, postType?: string) {
     const skip = (page - 1) * size;
     const where: any = {};
 
     if (search) {
-      where.title = Like(`%${search}%`);
+      where.title = ILike(`%${search}%`);
     }
     if (postType) {
       where.postType = postType;
     }
 
-    return this.postRepository.find({
-      where,
-      skip,
-      take: size,
-      order: { createdAt: 'DESC' },
-    });
+    const [posts, total] = await this.postRepository
+      .createQueryBuilder('post')
+      .leftJoinAndSelect('post.author', 'author')
+      .select(['post', 'author.id', 'author.name', 'author.email'])
+      .where(where)
+      .skip(skip)
+      .take(size)
+      .orderBy('post.createdAt', 'DESC')
+      .getManyAndCount();
+
+    return {
+      data: posts,
+      total,
+      page,
+      size,
+      totalPages: Math.ceil(total / size),
+    };
   }
 
   findOne(id: string): Promise<Post | null> {
     return this.postRepository.findOneBy({ id });
   }
 
-  async update(id: string, updatePostDto: UpdatePostDto): Promise<Post | null> {
-    await this.postRepository.update(id, updatePostDto);
+  async update(
+    id: string,
+    updatePostDto: UpdatePostDto,
+    userId: string,
+  ): Promise<Post | null> {
+    const post = await this.postRepository.findOne({ where: { id } });
+
+    if (!post) {
+      throw new Error('Пост не найден');
+    }
+
+    await this.postRepository.update(id, {
+      ...updatePostDto,
+      authorId: userId,
+    });
+
     return this.findOne(id);
   }
 

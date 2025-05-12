@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Like, Repository } from 'typeorm';
+import { ILike, Like, Repository } from 'typeorm';
 import { User } from './entities/user.entity';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
@@ -25,6 +25,10 @@ export class UsersService {
     return this.userRepository.findOne({ where: { activationToken: token } });
   }
 
+  findOne(id: string): Promise<User | null> {
+    return this.userRepository.findOneBy({ id });
+  }
+
   async activateUser(token: string, passwordHash: string): Promise<User> {
     const user = await this.findByActivationToken(token);
     if (!user) {
@@ -38,7 +42,7 @@ export class UsersService {
 
   async findAllUsers(page: number, size: number, search: string) {
     const [users, total] = await this.userRepository.findAndCount({
-      where: search ? { name: Like(`%${search}%`) } : {},
+      where: search ? { name: ILike(`%${search}%`) } : {},
       skip: (page - 1) * size,
       take: size,
       order: { createdAt: 'DESC' },

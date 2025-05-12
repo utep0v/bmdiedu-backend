@@ -45,8 +45,19 @@ export class AuthController {
 
   @UseGuards(JwtAuthGuard)
   @Get('me')
-  getProfile(@Request() req) {
-    return req.user;
+  async getProfile(@Request() req) {
+    const user = await this.usersService.findById(req.user.sub);
+
+    if (!user) {
+      throw new Error('Пользователь не найден.');
+    }
+
+    return {
+      id: user.id,
+      fullName: `${user.name}`,
+      email: user.email,
+      role: user.role,
+    };
   }
 
   @Post('forgot-password')
