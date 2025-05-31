@@ -7,6 +7,7 @@ import { UsersModule } from './users/users.module';
 import { AuthModule } from './auth/auth.module';
 import { ConfigModule } from '@nestjs/config';
 import { FilesModule } from './files/files.module';
+import { TextContentModule } from './text-content/text-content.module';
 
 @Module({
   imports: [
@@ -18,7 +19,7 @@ import { FilesModule } from './files/files.module';
       password: 'stalker1803',
       database: 'wordpress_pg',
       entities: [],
-      synchronize: false,
+      synchronize: true,
       autoLoadEntities: true,
     }),
     ConfigModule.forRoot({
@@ -28,6 +29,7 @@ import { FilesModule } from './files/files.module';
     UsersModule,
     AuthModule,
     FilesModule,
+    TextContentModule,
   ],
   controllers: [AppController],
   providers: [AppService],

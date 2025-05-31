@@ -12,7 +12,7 @@ export class Post {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @Column({ type: 'uuid', nullable: false })
+  @Column({ type: 'uuid', nullable: true })
   authorId: string;
 
   @Column({ type: 'varchar', length: 500 })

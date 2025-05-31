@@ -10,10 +10,10 @@ export class FileEntity {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @Column()
+  @Column({ nullable: true })
   filename: string;
 
-  @Column()
+  @Column({ nullable: true })
   path: string;
 
   @CreateDateColumn()
