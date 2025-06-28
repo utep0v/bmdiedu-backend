@@ -16,29 +16,18 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
     }),
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],
+      useFactory: (configService: ConfigService) => ({
+        type: 'postgres',
+        host: configService.get<string>('DATABASE_HOST'),
+        port: configService.get<number>('DATABASE_PORT'),
+        username: configService.get<string>('DATABASE_USER'),
+        password: configService.get<string>('DATABASE_PASSWORD'),
+        database: configService.get<string>('DATABASE_NAME'),
+        entities: [],
+        synchronize: true,
+        autoLoadEntities: true,
+      }),
       inject: [ConfigService],
-      useFactory: (configService: ConfigService) => {
-        // DEBUG: Смотрим, что реально пришло из env
-        const host = configService.get<string>('DB_HOST');
-        const portRaw = configService.get<string>('DB_PORT'); // читаем как строку
-        const port = portRaw ? parseInt(portRaw, 10) : 5432; // приводим к числу
-        const username = configService.get<string>('DB_USERNAME');
-        const password = configService.get<string>('DB_PASSWORD');
-        const database = configService.get<string>('DB_DATABASE');
-        console.log('DB CONFIG:', { host, port, username, password, database }); // debug!
-
-        return {
-          type: 'postgres',
-          host,
-          port,
-          username,
-          password,
-          database,
-          entities: [],
-          synchronize: true,
-          autoLoadEntities: true,
-        };
-      },
     }),
     PostsModule,
     UsersModule,
