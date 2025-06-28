@@ -11,6 +11,9 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 
 @Module({
   imports: [
+    ConfigModule.forRoot({
+      isGlobal: true,
+    }),
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],
       useFactory: (configService: ConfigService) => ({
@@ -25,9 +28,6 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
         autoLoadEntities: true,
       }),
       inject: [ConfigService],
-    }),
-    ConfigModule.forRoot({
-      isGlobal: true,
     }),
     PostsModule,
     UsersModule,
