@@ -62,7 +62,7 @@ export class AuthService {
     user.resetToken = resetToken;
     await this.usersService.saveUser(user);
 
-    const resetLink = `http://frontend-url.com/reset-password/${resetToken}`;
+    const resetLink = `https://bmdiedu.kz/auth/reset-password/${resetToken}`;
 
     await this.mailService.sendPasswordResetEmail(user.email, resetLink);
 

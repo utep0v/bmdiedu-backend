@@ -36,7 +36,7 @@ export class UsersController {
     });
     await this.mailService.sendActivationEmail(
       createUserDto.email,
-      `http://frontend-url.com/active-user/${activationToken}`,
+      `https://bmdiedu.kz/auth/active-user/${activationToken}`,
     );
 
     return { message: 'Пользователь создан. Ссылка активации отправлена.' };

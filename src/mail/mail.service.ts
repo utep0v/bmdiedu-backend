@@ -36,7 +36,6 @@ export class MailService {
   }
 
   sendPasswordResetEmail(to: string, resetLink: string) {
-    console.log(resetLink);
     const mailOptions = {
       from: '"BMDI EDU"',
       to,
