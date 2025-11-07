@@ -78,10 +78,12 @@ export class PostsService {
       throw new Error('Пост не найден');
     }
 
-    await this.postRepository.update(id, {
-      ...updatePostDto,
-      authorId: userId,
-    });
+    const data: any = { ...updatePostDto, authorId: userId };
+
+    if (data.coverUrl === '') data.coverUrl = null;
+    if (data.docx === '') data.docx = null;
+
+    await this.postRepository.update(id, data);
 
     return this.findOne(id);
   }

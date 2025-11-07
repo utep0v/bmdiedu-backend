@@ -31,10 +31,7 @@ export class AuthService {
   async login(user: User) {
     const payload = { sub: user.id, email: user.email, role: user.role };
 
-    const accessToken = await this.jwtService.signAsync(payload, {
-      secret: this.configService.get('JWT_SECRET'),
-      expiresIn: this.configService.get('JWT_EXPIRES_IN'), // например 15m
-    });
+    const accessToken = await this.jwtService.signAsync(payload);
 
     const refreshToken = await this.jwtService.signAsync(payload, {
       secret: this.configService.get('JWT_REFRESH_SECRET'),
@@ -104,13 +101,11 @@ export class AuthService {
       throw new Error('Неверный refresh token');
     }
 
-    const newAccessToken = await this.jwtService.signAsync(
-      { sub: user.id, email: user.email, role: user.role },
-      {
-        secret: this.configService.get('JWT_SECRET'),
-        expiresIn: this.configService.get('JWT_EXPIRES_IN'),
-      },
-    );
+    const newAccessToken = await this.jwtService.signAsync({
+      sub: user.id,
+      email: user.email,
+      role: user.role,
+    });
 
     return { access_token: newAccessToken };
   }
